@@ -286,98 +286,120 @@
 <script>
  
   $(document).ready(function(){
-    reset();
+    //reset();
+
+      var ajaxConfigCustomerTableLOad = {
+          method:"GET",
+          url:"http://localhost:3000/api/v1/customers",
+          async:true,
+          contentType:"application/x-www-form-urlencoded",
+          data:$("form").serialize()
+      }
+      $.ajax(ajaxConfigCustomerTableLOad).done(function (response,statusText,jxhr) {
+          console.log("success");
+          console.log(response[0]);
+          for (var i=0;response.length;i++){
+              $("#tblCustomer").append("<tr><td>"+response[i].id+"</td><td>"+response[i].name+"</td><td>"+response[i].address+"</td><td><button type='button' class='btn btn-primary btn-sm' id='btnDelete'>Delete</button></td></tr>")
+          }
+
+
+      }).fail(function (jxhr,statusText,error) {
+          console.log(jxhr.response);
+
+      });
+
+
   })
 
-  
-function reset() {
-            $("#txtCustomerAddress").val("");
-            $("#txtCustomerAddress").attr("disabled",true);
-
-            $("#txtCustomerName").val("");
-            $("#txtCustomerName").attr("disabled",true);
-
-            $("#txtCustomerId").val("");
-            $("#txtCustomerId").attr("disabled",true);
-
-            $("#btnCustomerSave").attr("disabled",true);
-
-            
-        }
-
-        $("#btnNewCustomer").click(function(){
-
-          $("#txtCustomerAddress").val("");
-            $("#txtCustomerAddress").attr("disabled",false);
-
-            $("#txtCustomerName").val("");
-            $("#txtCustomerName").attr("disabled",false);
-
-            $("#txtCustomerId").val("");
-            $("#txtCustomerId").attr("disabled",false);
-
-            $("#btnCustomerSave").attr("disabled",false);
-
-
-
-        });
-
-        function isItemExists(code) {
-            var flag = null;
-            $("#tblOrderDetails tbody tr").each(function () {
-                var itemCode = $(this).find("td:first-child").text();
-                if (itemCode == code) {
-                    flag = this;
-                    return;
-                }
-            });
-            return flag;
-        }
-
-
-        $("#btnCustomerSave").click(function(){
-
-          var cusName= $("#txtCustomerName").val();
-          var CusId= $("#txtCustomerId").val();
-          var cusAddress=$("#txtCustomerAddress").val();
-
-          var currentRow = isItemExists(CusId);
-
-          var html = `<tr>
+//
+// function reset() {
+//             $("#txtCustomerAddress").val("");
+//             $("#txtCustomerAddress").attr("disabled",true);
+//
+//             $("#txtCustomerName").val("");
+//             $("#txtCustomerName").attr("disabled",true);
+//
+//             $("#txtCustomerId").val("");
+//             $("#txtCustomerId").attr("disabled",true);
+//
+//             $("#btnCustomerSave").attr("disabled",true);
+//
+//
+//         }
+//
+//         $("#btnNewCustomer").click(function(){
+//
+//           $("#txtCustomerAddress").val("");
+//             $("#txtCustomerAddress").attr("disabled",false);
+//
+//             $("#txtCustomerName").val("");
+//             $("#txtCustomerName").attr("disabled",false);
+//
+//             $("#txtCustomerId").val("");
+//             $("#txtCustomerId").attr("disabled",false);
+//
+//             $("#btnCustomerSave").attr("disabled",false);
+//
+//
+//
+//         });
+//
+//         function isItemExists(code) {
+//             var flag = null;
+//             $("#tblOrderDetails tbody tr").each(function () {
+//                 var itemCode = $(this).find("td:first-child").text();
+//                 if (itemCode == code) {
+//                     flag = this;
+//                     return;
+//                 }
+//             });
+//             return flag;
+//         }
+//
+//
+//         $("#btnCustomerSave").click(function(){
+//
+//           var cusName= $("#txtCustomerName").val();
+//           var CusId= $("#txtCustomerId").val();
+//           var cusAddress=$("#txtCustomerAddress").val();
+//
+//           var currentRow = isItemExists(CusId);
+//
+//           var html = `<tr>
 //                             <td class="text-center">${CusId}</td>
-//                             <td>${cusName}</td>
-//                             <td class="text-left">${cusAddress}</td
-//                             <td><div class=".icon-delete"></div></td>
-//                         </tr>`;
-
-          $("#tblCustomer tbody").append(html);
-          reset();
-
-          $("#tblCustomer tbody tr").off("click");
-            $("#tblCustomer tbody tr").click(function () {
-                var cusid = $(this).find("td:first-child").text();
-                var cusname = $(this).find("td:nth-child(2)").text();
-                var cusaddress = $(this).find("td:nth-child(3)").text();
-            
-                
-                $("#txtCustomerId").val(cusid);
-                $("#txtCustomerName").val(cusname);
-                $("#txtCustomerAddress").val(cusaddress);
-                $("#btnCustomerSave").html('<i class="fas fa-cart-plus"></i> Update Customer');
-
-                $("#txtCustomerAddress").attr("disabled",false);
-
-            
-            $("#txtCustomerName").attr("disabled",false);
-
-            
-            $("#txtCustomerId").attr("disabled",false);
-
-            $("#btnCustomerSave").attr("disabled",false);
-                
-            });
-
-        });
+//                              <td>${cusName}</td>
+//                              <td class="text-left">${cusAddress}</td
+//                              <td><div class=".icon-delete"></div></td>
+//                          </tr>`;
+//
+//           $("#tblCustomer tbody").append(html);
+//           reset();
+//
+//           $("#tblCustomer tbody tr").off("click");
+//             $("#tblCustomer tbody tr").click(function () {
+//                 var cusid = $(this).find("td:first-child").text();
+//                 var cusname = $(this).find("td:nth-child(2)").text();
+//                 var cusaddress = $(this).find("td:nth-child(3)").text();
+//
+//
+//                 $("#txtCustomerId").val(cusid);
+//                 $("#txtCustomerName").val(cusname);
+//                 $("#txtCustomerAddress").val(cusaddress);
+//                 $("#btnCustomerSave").html('<i class="fas fa-cart-plus"></i> Update Customer');
+//
+//                 $("#txtCustomerAddress").attr("disabled",false);
+//
+//
+//             $("#txtCustomerName").attr("disabled",false);
+//
+//
+//             $("#txtCustomerId").attr("disabled",false);
+//
+//             $("#btnCustomerSave").attr("disabled",false);
+//
+//             });
+//
+//         });
 
           
 
@@ -433,23 +455,23 @@ function reset() {
 //             });
 //             return flag;
 //         }
-
-        $("#tblCustomer .icon-delete").off("click");
-            $("#tblCustomer .icon-delete").click(function (eventData) {
-                eventData.stopPropagation();
-                if (confirm("Are you sure that you want to delete this item?")) {
-                    var qty = parseInt($(this).parents("tr").find("td:nth-child(4)").text());
-                    var itemCode = $(this).parents("tr").find("td:first-child").text();
-                    var item = findItem(itemCode);
-                    item.qtyOnHand += qty;
-
-                    $(this).fadeOut(500, function () {
-                        $(this).parents("tr").remove();
-                        calculateTotal();
-                    });
-                }
-            });
-
+//
+//         $("#tblCustomer .icon-delete").off("click");
+//             $("#tblCustomer .icon-delete").click(function (eventData) {
+//                 eventData.stopPropagation();
+//                 if (confirm("Are you sure that you want to delete this item?")) {
+//                     var qty = parseInt($(this).parents("tr").find("td:nth-child(4)").text());
+//                     var itemCode = $(this).parents("tr").find("td:first-child").text();
+//                     var item = findItem(itemCode);
+//                     item.qtyOnHand += qty;
+//
+//                     $(this).fadeOut(500, function () {
+//                         $(this).parents("tr").remove();
+//                         calculateTotal();
+//                     });
+//                 }
+//             });
+//
             
 
 

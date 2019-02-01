@@ -10,6 +10,7 @@ import {error} from "util";
 // This will return a new instance of a router object that can be used to handle routing
 const customerDispatcher = express.Router();
 
+
 /*
 customerDispatcher.get("", (req, res) => {
     res.send("GET Request");

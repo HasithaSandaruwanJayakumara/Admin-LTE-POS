@@ -271,33 +271,36 @@
 
 <script>
   $(document).ready(function () {
-      var ajaxConfig = {
+      var ajaxConfigCustomerCount = {
           method:"HEAD",
           url:"http://localhost:3000/api/v1/customers",
           async:true,
           // contentType:"application/x-www-form-urlencoded",
           // data:$("form").serialize()
       }
-      $.ajax(ajaxConfig).done(function (response,statusText,jxhr) {
+      $.ajax(ajaxConfigCustomerCount).done(function (response,statusText,jxhr) {
           var customerCount =jxhr.getResponseHeader("X-Count");
           $("#lblCustomerCount").text(customerCount);
       }).fail(function (jxhr,statusText,error) {
           
       });
 
-      var ajaxConfig2 = {
+      var ajaxConfigItenCount = {
           method:"HEAD",
           url:"http://localhost:3000/api/v1/items",
           async:true,
           // contentType:"application/x-www-form-urlencoded",
           // data:$("form").serialize()
       }
-      $.ajax(ajaxConfig2).done(function (response,statusText,jxhr) {
+      $.ajax(ajaxConfigItenCount).done(function (response,statusText,jxhr) {
           var itemCount =jxhr.getResponseHeader("X-Count");
           $("#lblItemCount").text(itemCount);
       }).fail(function (jxhr,statusText,error) {
 
-      })
+      });
+
+
+
   })
 </script>
 </body>
