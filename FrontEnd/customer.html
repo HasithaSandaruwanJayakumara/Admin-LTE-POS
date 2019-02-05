@@ -39,6 +39,27 @@
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
+  <style>
+    .dataTables_filter {
+      text-align: right !important;
+    }
+
+    .delete{
+      padding: 5px;
+    }
+
+    table tbody tr{
+      cursor: pointer;
+    }
+
+    table tbody tr td{
+      vertical-align: middle !important;
+    }
+
+    .selected-row{
+      background-color: rgba(0, 48, 70, 0.16) !important;
+    }
+  </style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
@@ -175,7 +196,11 @@
     
                   <div class="box-footer">
                     <button type="button" id="btnCustomerSave" class="btn btn-primary">Save</button>
+                    <button type="reset" id="btnClear" class="btn btn-primary">Clear</button>
                   </div>
+
+
+
                   <br>
                   <br>
                 </form>
@@ -222,8 +247,9 @@
       
       <!-- /.row (main row) -->
 
-      
 
+</div>
+        </div>
     </section>
     <!-- /.content -->
     
@@ -285,31 +311,190 @@
 <script src="dist/js/demo.js"></script>
 <script>
  
+  // $(document).ready(function(){
+  //   //reset();
+  //
+  //     var ajaxConfigCustomerTableLOad = {
+  //         method:"GET",
+  //         url:"http://localhost:3000/api/v1/customers",
+  //         async:true,
+  //         contentType:"application/x-www-form-urlencoded",
+  //         data:$("form").serialize()
+  //     }
+  //     $.ajax(ajaxConfigCustomerTableLOad).done(function (response,statusText,jxhr) {
+  //         console.log("success");
+  //         console.log(response[0]);
+  //         for (var i=0;response.length;i++){
+  //             $("#tblCustomer").append("<tr><td>"+response[i].id+"</td><td>"+response[i].name+"</td><td>"+response[i].address+"</td><td><button type='button' class='btn btn-primary btn-sm' id='btnDelete'>Delete</button></td></tr>")
+  //
+  //             console.log(this);
+  //             $("#btnDelete").click(off());
+  //             var cusID = $("#btnDelete").parent();
+  //             console.log(cusID);
+  //             $("#btnDelete").click(function () {
+  //
+  //                 var ajaxConfigCustomerTableLOad = {
+  //                     method:"DELETE",
+  //                     url:"http://localhost:3000/api/v1/customers"+cusID,
+  //                     async:true,
+  //                     contentType:"application/x-www-form-urlencoded",
+  //                     data:$("form").serialize()
+  //                 }
+  //
+  //
+  //
+  //             })
+  //
+  //
+  //         }
+  //
+  //
+  //     }).fail(function (jxhr,statusText,error) {
+  //         console.log(jxhr.response);
+  //
+  //     });
+  //
+  //
+  // })
+
+    $("#btnCustomerSave").click(function () {
+       if($("txtCustomerId").attr("disabled")){
+           console.log("update")
+           var customer = {
+               id: $("#txtCustomerId").val(),
+               name: $("#txtCustomerName").val(),
+               address: $("#txtCustomerAddress").val()
+           };
+
+           var ajaxConfig = {
+               method: "PUT",
+               url: "http://localhost:3000/api/v1/customers" + $("#txtCustomerId").val(),
+               async: true,
+               contentType: "application/json",
+               data: JSON.stringify(customer)
+           }
+
+           }else {
+           console.log("save");
+
+           var customer = {
+               id: $("#txtCustomerId").val(),
+               name: $("#txtCustomerName").val(),
+               address: $("#txtCustomerAddress").val()
+           };
+
+           var ajaxConfig = {
+               method: "POST",
+               url: "http://localhost:3000/api/v1/customers",
+               async: true,
+               contentType: "application/json",
+               data: JSON.stringify(customer)
+           }
+
+           $.ajax(ajaxConfig).done(function(response,statusText,jxhr){
+               alert("Added Successfully");
+               loadAllCustomers();
+               $('button[type="reset"]').trigger("click");
+           }).fail(function(jxhr,statusText,error){
+               alert("Unable to save the customer, try again");
+               console.log(error);
+           });
+
+
+       }
+
+    })
+
+  $('button[type="reset"]').click(function(){
+      $("#tblCustomer tbody tr").removeClass("selected-row");
+      $("#txtCustomerId").attr("disabled",false);
+  });
   $(document).ready(function(){
-    //reset();
 
-      var ajaxConfigCustomerTableLOad = {
-          method:"GET",
-          url:"http://localhost:3000/api/v1/customers",
-          async:true,
-          contentType:"application/x-www-form-urlencoded",
-          data:$("form").serialize()
-      }
-      $.ajax(ajaxConfigCustomerTableLOad).done(function (response,statusText,jxhr) {
-          console.log("success");
-          console.log(response[0]);
-          for (var i=0;response.length;i++){
-              $("#tblCustomer").append("<tr><td>"+response[i].id+"</td><td>"+response[i].name+"</td><td>"+response[i].address+"</td><td><button type='button' class='btn btn-primary btn-sm' id='btnDelete'>Delete</button></td></tr>")
-          }
+      loadAllCustomers();
 
+  });
 
-      }).fail(function (jxhr,statusText,error) {
-          console.log(jxhr.response);
+function loadAllCustomers() {
 
-      });
+    var ajaxConfig={
+        method:"GET",
+        url:"http://localhost:3000/api/v1/customers",
+        async:true
+    };
+
+    $.ajax(ajaxConfig).done(function (customers,statusText,jxhr) {
+        customers.forEach(function (customer) {
+            $("#tblCustomer").append("<tr><td>"+customer.id+"</td><td>"+customer.name+"</td><td>"+customer.address+"</td><td><button type='button' class='btn btn-primary btn-sm delete' id='btnDelete'>Delete</button></td></tr>")
 
 
-  })
+        });
+        $("#tblCustomer tbody tr").off("click");
+        $("#tblCustomer tbody tr").click(function () {
+            console.log("working");
+
+            $("#txtCustomerId").val($(this).find("td:first-child").text());
+             $("#txtCustomerId").attr("disabled",true);
+             $("#txtCustomerName").val($(this).find("td:nth-child(2)").text());
+            $("#txtCustomerAddress").val($(this).find("td:nth-child(3)").text());
+
+
+            //////tbl delete button
+            $("button.delete").off("click");
+            $("button.delete").click(function (eventData) {
+
+                eventData.stopPropagation();
+
+                console.log("working delete");
+
+                var row = $(this).parents("tr");
+                var customerId = (row.find("td:first-child").text());
+
+                if (confirm("Are you sure to delete this customer?")){
+                    var row = $(this).parents("tr");
+                    var customerId = (row.find("td:first-child").text())
+                    console.log(customerId);
+
+
+                    var ajaxConfig = {
+                        method : "DELETE",
+                        url:"http://localhost:3000/api/v1/customers/" + customerId,
+                        async: true
+                    }
+
+                    $.ajax(ajaxConfig).done(function (response,statusText,jxhr) {
+                        $(row).remove();
+
+                    }).fail(function(jxhr,statusText,error){
+
+                        console.log(jxhr.responseText);
+
+                    });
+
+
+                }
+
+
+
+
+
+            })
+
+
+
+        })
+
+
+
+
+
+    }).fail(function (jxhr,statusText,error) {
+        console.log(error)
+
+    })
+
+
+}
 
 //
 // function reset() {

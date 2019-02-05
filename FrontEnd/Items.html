@@ -37,6 +37,27 @@
 
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <style>
+    .dataTables_filter {
+      text-align: right !important;
+    }
+
+    .delete{
+      padding: 5px;
+    }
+
+    table tbody tr{
+      cursor: pointer;
+    }
+
+    table tbody tr td{
+      vertical-align: middle !important;
+    }
+
+    .selected-row{
+      background-color: rgba(0, 48, 70, 0.16) !important;
+    }
+  </style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
@@ -181,7 +202,8 @@
                 <!-- /.box-body -->
   
                 <div class="box-footer">
-                  <button type="submit" id="btnItemSave" class="btn btn-primary">Save</button>
+                  <button type="button" id="btnItemSave" class="btn btn-primary">Save</button>
+                  <button type="reset" id="btnClear" class="btn btn-primary">Clear</button>
                 </div>
                 <br>
                 <br>
@@ -291,167 +313,296 @@
 <!-- AdminLTE for demo purposes -->
 <script src="dist/js/demo.js"></script>
 <script>
+
+    $("#btnItemSave").click(function () {
+        if($("txtCustomerId").attr("disabled")){
+            console.log("update")
+            var customer = {
+                code: $("#txtItemCode").val(),
+                description: $("#txtItemDescription").val(),
+                uinitPrice: $("#txtItemUinitPrice").val(),
+                qty: $("#txtQty").val()
+            };
+
+            var ajaxConfig = {
+                method: "PUT",
+                url: "http://localhost:3000/api/v1/items" + $("#txtItemCode").val(),
+                async: true,
+                contentType: "application/json",
+                data: JSON.stringify(customer)
+            }
+
+        }else {
+            console.log("save");
+
+            var customer = {
+                code: $("#txtItemCode").val(),
+                description: $("#txtItemDescription").val(),
+                uinitPrice: $("#txtItemUinitPrice").val(),
+                qty: $("#txtQty").val()
+            };
+
+            var ajaxConfig = {
+                method: "POST",
+                url: "http://localhost:3000/api/v1/items",
+                async: true,
+                contentType: "application/json",
+                data: JSON.stringify(customer)
+            }
+
+            $.ajax(ajaxConfig).done(function(response,statusText,jxhr){
+                alert("Added Successfully");
+                loadAllCustomers();
+                $('button[type="reset"]').trigger("click");
+            }).fail(function(jxhr,statusText,error){
+                alert("Unable to save the customer, try again");
+                console.log(error);
+            });
+
+
+        }
+
+    })
+
+    $('button[type="reset"]').click(function(){
+        $("#tblCustomer tbody tr").removeClass("selected-row");
+        $("#txtCustomerId").attr("disabled",false);
+    });
  
     $(document).ready(function(){
-      reset();
-    })
-  
-    
-  function reset() {
-              $("#txtItemCode").val("");
-              $("#txtItemCode").attr("disabled",true);
-  
-              $("#txtItemDescription").val("");
-              $("#txtItemDescription").attr("disabled",true);
-  
-              $("#txtItemUinitPrice").val("");
-              $("#txtItemUinitPrice").attr("disabled",true);
 
-              $("#txtQty").val("");
-              $("#txtQty").attr("disabled",true);
-  
-              $("#btnItemSave").attr("disabled",true);
-  
-              
-          }
-  
-          $("#btnNewItem").click(function(){
-  
-            $("#txtItemCode").val("");
-              $("#txtItemCode").attr("disabled",false);
-  
-              $("#txtItemDescription").val("");
-              $("#txtItemDescription").attr("disabled",false);
-  
-              $("#txtItemUinitPrice").val("");
-              $("#txtItemUinitPrice").attr("disabled",false);
+            loadAllCustomers();
+    });
 
-              $("#txtQty").val("");
-              $("#txtQty").attr("disabled",false);
-  
-              $("#btnItemSave").attr("disabled",false);
-  
-  
-  
-          });
-          $("#btnItemSave").click(function(){
-  
-            var code= $("#txtItemCode").val();
-            var description= $("#txtItemDescription").val();
-            var unitPrice=$("#txtItemUinitPrice").val();
-            var qty=$("#txtQty").val("#txtQty");
-  
-            
-  
-            var html = `<tr>
-                              <td class="text-center">${code}</td>
-                              <td>${description}</td>
-                              <td class="text-left">${unitPrice}</td
-                              <td class="text-left">${qty}</td
-                              <td><div class=".icon-delete"></div></td>
-                          </tr>`;
-  
-            $("#tblItem tbody").append(html);
-  
-            reset();
+    function loadAllCustomers() {
+        var ajaxConfig={
+            method:"GET",
+            url:"http://localhost:3000/api/v1/items",
+            async:true
+        };
+        $.ajax(ajaxConfig).done(function (items,statusText,jxhr){
+            items.forEach(function (item) {
+                $("#tblItem").append("<tr><td>"+item.code+"</td><td>"+item.description+"</td><td>"+item.unitPrice+"</td><td>"+item.qtyOnHand+"</td><td><button type='button' class='btn btn-primary btn-sm delete' id='btnDelete'>Delete</button></td></tr>")
 
+
+            });
 
             $("#tblItem tbody tr").off("click");
             $("#tblItem tbody tr").click(function () {
-                var code = $(this).find("td:first-child").text();
-                var desccription = $(this).find("td:nth-child(2)").text();
-                var unitprice = $(this).find("td:nth-child(3)").text();
-                var qty = $(this).find("td:nth-child(3)").text();
-            
-                
-                $("#txtItemCode").val(code);
-                $("#txtItemDescription").val(desccription);
-                $("#txtItemUinitPrice").val(unitprice);
-                $("#txtQty").val(qty);
-                $("#btnItemSave").html('<i class="fas fa-cart-plus"></i> Update Item');
 
-                $("#txtItemCode").attr("disabled",false);
-
-            
-            $("#txtItemDescription").attr("disabled",false);
-
-            
-            $("#txtItemUinitPrice").attr("disabled",false);
-            $("#txtQty").attr("disabled",false);
+                $("#txtItemCode").val($(this).find("td:first-child").text());
+                $("#txtItemCode").attr("disabled",true);
+                $("#txtItemDescription").val($(this).find("td:nth-child(2)").text());
+                $("#txtItemUinitPrice").val($(this).find("td:nth-child(3)").text());
+                $("#txtQty").val($(this).find("td:nth-child(4)").text());
 
 
-            $("#btnItemSave").attr("disabled",false);
-                
-            });
+                $("button.delete").off("click");
+                $("button.delete").click(function (eventData) {
 
-          });
-  
-          //   $("#tblItem tbody tr").off("click");
-          //     $("#tblItem tbody tr").click(function () {
-          //         var itemcode = $(this).find("td:first-child").text();
-          //         var itemdescription = $(this).find("td:nth-child(2)").text();
-          //         var itemunitprice = $(this).find("td:nth-child(3)").text();
-          //         var qty = $(this).find("td:nth-child(4)").text();  
-                  
-          //         $("#txtItemCode").val(itemcode);
-          //         $("#txtItemDescription").val(itemdescription);
-          //         $("#txtItemUinitPrice").val(itemunitprice);
-                  
-          //         $("#txtQty").val(qty);
-          //         $("#btnItemSave").html('<i class="fas fa-cart-plus"></i> Update Customer');
-  
-                  
-          //     $("#txtItemCode").attr("disabled",false);
-  
-              
-          //     $("#txtItemDescription").attr("disabled",false);
-  
-              
-          //     $("#txtItemUinitPrice").attr("disabled",false);
+                    eventData.stopPropagation();
 
-              
-          //     $("#txtQty").attr("disabled",false);
+                    console.log("working delete");
+
+                    var row = $(this).parents("tr");
+                    var customerId = (row.find("td:first-child").text());
+
+                    if (confirm("Are you sure to delete this customer?")){
+                        var row = $(this).parents("tr");
+                        var itemCode = (row.find("td:first-child").text())
+                        console.log(itemCode);
+
+
+                        var ajaxConfig = {
+                            method :"DELETE",
+                            url:"http://localhost:3000/api/v1/items/" + itemCode,
+                            async: true
+                        }
+
+                        $.ajax(ajaxConfig).done(function (response,statusText,jxhr) {
+                            $(row).remove();
+
+                        }).fail(function(jxhr,statusText,error){
+
+                            console.log(jxhr.responseText);
+
+                        });
+
+
+                    }
+
+
+                })
+
+
+
+
+                })
+
+
+        }).fail(function (jxhr,statusText,error) {
+            console.log(error)
+
+        })
+
+    }
   
-          //     $("#btnItemSave").attr("disabled",false);
-  
-                  
-          //     });
-  
-              
-              
-  
-  
-  
-  
-          // });
-  
-          // function isCustomerExists(code) {
-          //     var flag = null;
-          //     $("#tblItem tbody tr").each(function () {
-          //         var cusid = $(this).find("td:first-child").text();
-          //         if (cusid == code) {
-          //             flag = this;
-          //             return;
-          //         }
-          //     });
-          //     return flag;
-          // }
-  
-          $("#tblItem .icon-delete").off("click");
-              $("#tblItem .icon-delete").click(function (eventData) {
-                  eventData.stopPropagation();
-                  if (confirm("Are you sure that you want to delete this item?")) {
-                      
-  
-                      $(this).fadeOut(500, function () {
-                          $(this).parents("tr").remove();
-                          
-                      });
-                  }
-              });
-  
-              
-  
+    
+  // function reset() {
+  //             $("#txtItemCode").val("");
+  //             $("#txtItemCode").attr("disabled",true);
+  //
+  //             $("#txtItemDescription").val("");
+  //             $("#txtItemDescription").attr("disabled",true);
+  //
+  //             $("#txtItemUinitPrice").val("");
+  //             $("#txtItemUinitPrice").attr("disabled",true);
+  //
+  //             $("#txtQty").val("");
+  //             $("#txtQty").attr("disabled",true);
+  //
+  //             $("#btnItemSave").attr("disabled",true);
+  //
+  //
+  //         }
+  //
+  //         $("#btnNewItem").click(function(){
+  //
+  //           $("#txtItemCode").val("");
+  //             $("#txtItemCode").attr("disabled",false);
+  //
+  //             $("#txtItemDescription").val("");
+  //             $("#txtItemDescription").attr("disabled",false);
+  //
+  //             $("#txtItemUinitPrice").val("");
+  //             $("#txtItemUinitPrice").attr("disabled",false);
+  //
+  //             $("#txtQty").val("");
+  //             $("#txtQty").attr("disabled",false);
+  //
+  //             $("#btnItemSave").attr("disabled",false);
+  //
+  //
+  //
+  //         });
+  //         $("#btnItemSave").click(function(){
+  //
+  //           var code= $("#txtItemCode").val();
+  //           var description= $("#txtItemDescription").val();
+  //           var unitPrice=$("#txtItemUinitPrice").val();
+  //           var qty=$("#txtQty").val("#txtQty");
+  //
+  //
+  //
+  //           var html = `<tr>
+  //                             <td class="text-center">${code}</td>
+  //                             <td>${description}</td>
+  //                             <td class="text-left">${unitPrice}</td
+  //                             <td class="text-left">${qty}</td
+  //                             <td><div class=".icon-delete"></div></td>
+  //                         </tr>`;
+  //
+  //           $("#tblItem tbody").append(html);
+  //
+  //           reset();
+  //
+  //
+  //           $("#tblItem tbody tr").off("click");
+  //           $("#tblItem tbody tr").click(function () {
+  //               var code = $(this).find("td:first-child").text();
+  //               var desccription = $(this).find("td:nth-child(2)").text();
+  //               var unitprice = $(this).find("td:nth-child(3)").text();
+  //               var qty = $(this).find("td:nth-child(3)").text();
+  //
+  //
+  //               $("#txtItemCode").val(code);
+  //               $("#txtItemDescription").val(desccription);
+  //               $("#txtItemUinitPrice").val(unitprice);
+  //               $("#txtQty").val(qty);
+  //               $("#btnItemSave").html('<i class="fas fa-cart-plus"></i> Update Item');
+  //
+  //               $("#txtItemCode").attr("disabled",false);
+  //
+  //
+  //           $("#txtItemDescription").attr("disabled",false);
+  //
+  //
+  //           $("#txtItemUinitPrice").attr("disabled",false);
+  //           $("#txtQty").attr("disabled",false);
+  //
+  //
+  //           $("#btnItemSave").attr("disabled",false);
+  //
+  //           });
+  //
+  //         });
+  //
+  //         //   $("#tblItem tbody tr").off("click");
+  //         //     $("#tblItem tbody tr").click(function () {
+  //         //         var itemcode = $(this).find("td:first-child").text();
+  //         //         var itemdescription = $(this).find("td:nth-child(2)").text();
+  //         //         var itemunitprice = $(this).find("td:nth-child(3)").text();
+  //         //         var qty = $(this).find("td:nth-child(4)").text();
+  //
+  //         //         $("#txtItemCode").val(itemcode);
+  //         //         $("#txtItemDescription").val(itemdescription);
+  //         //         $("#txtItemUinitPrice").val(itemunitprice);
+  //
+  //         //         $("#txtQty").val(qty);
+  //         //         $("#btnItemSave").html('<i class="fas fa-cart-plus"></i> Update Customer');
+  //
+  //
+  //         //     $("#txtItemCode").attr("disabled",false);
+  //
+  //
+  //         //     $("#txtItemDescription").attr("disabled",false);
+  //
+  //
+  //         //     $("#txtItemUinitPrice").attr("disabled",false);
+  //
+  //
+  //         //     $("#txtQty").attr("disabled",false);
+  //
+  //         //     $("#btnItemSave").attr("disabled",false);
+  //
+  //
+  //         //     });
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //         // });
+  //
+  //         // function isCustomerExists(code) {
+  //         //     var flag = null;
+  //         //     $("#tblItem tbody tr").each(function () {
+  //         //         var cusid = $(this).find("td:first-child").text();
+  //         //         if (cusid == code) {
+  //         //             flag = this;
+  //         //             return;
+  //         //         }
+  //         //     });
+  //         //     return flag;
+  //         // }
+  //
+  //         $("#tblItem .icon-delete").off("click");
+  //             $("#tblItem .icon-delete").click(function (eventData) {
+  //                 eventData.stopPropagation();
+  //                 if (confirm("Are you sure that you want to delete this item?")) {
+  //
+  //
+  //                     $(this).fadeOut(500, function () {
+  //                         $(this).parents("tr").remove();
+  //
+  //                     });
+  //                 }
+  //             });
+  //
+  //
+  //
   
   
   </script>
